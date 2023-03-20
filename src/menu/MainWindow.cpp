@@ -186,8 +186,8 @@ void MainWindow::SetupMainView()
 		MessageBox * messageBox = new MessageBox(MessageBox::BT_OK, MessageBox::IT_ICONERROR, false);
 		messageBox->setState(GuiElement::STATE_DISABLED);
 		messageBox->setEffect(EFFECT_FADE, 10, 255);
-		messageBox->setTitle("Error:");
-		messageBox->setMessage1("No installable content found.");
+		messageBox->setTitle("错误:");
+		messageBox->setMessage1("没有找到可安装内容!");
 		messageBox->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
 		messageBox->messageOkClicked.connect(this, &MainWindow::OnErrorMessageBoxClick);
 		

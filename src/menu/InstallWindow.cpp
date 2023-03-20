@@ -50,9 +50,9 @@ InstallWindow::InstallWindow(CFolderList * list)
 	
 	if(folderCount > 0)
 	{
-		std::string message = fmt("%d application(s)", folderCount);
+		std::string message = fmt("总共 %d 个软件", folderCount);
 		messageBox = new MessageBox(MessageBox::BT_YESNO, MessageBox::IT_ICONQUESTION, false);
-		messageBox->setTitle("Are you sure you want to install:");
+		messageBox->setTitle("你想要安装这些软件吗:");
 		messageBox->setMessage1(message);
 		messageBox->messageYesClicked.connect(this, &InstallWindow::OnValidInstallClick);
 		messageBox->messageNoClicked.connect(this, &InstallWindow::OnCloseWindow);
@@ -60,8 +60,8 @@ InstallWindow::InstallWindow(CFolderList * list)
 	else
 	{
 		messageBox = new MessageBox(MessageBox::BT_OK, MessageBox::IT_ICONEXCLAMATION, false);
-		messageBox->setTitle("No content selected.");
-		messageBox->setMessage1("Return to folder browser.");
+		messageBox->setTitle("没有选中的内容。");
+		messageBox->setMessage1("返回到选择界面");
 		messageBox->messageOkClicked.connect(this, &InstallWindow::OnCloseWindow);
 	}
 	
@@ -86,7 +86,7 @@ void InstallWindow::OnValidInstallClick(GuiElement * element, int val)
 {
 	messageBox->messageYesClicked.disconnect(this);
 	messageBox->messageNoClicked.disconnect(this);
-	messageBox->reload("Where do you want to install?", "", "", MessageBox::BT_DEST, MessageBox::IT_ICONQUESTION);
+	messageBox->reload("你想安装在哪里?", "", "", MessageBox::BT_DEST, MessageBox::IT_ICONQUESTION);
 	messageBox->messageYesClicked.connect(this, &InstallWindow::OnDestinationChoice);
 	messageBox->messageNoClicked.connect(this, &InstallWindow::OnDestinationChoice);
 }
@@ -136,7 +136,7 @@ void InstallWindow::executeThread()
 				{
 					time--;
 					startTime = OSGetTime();
-					messageBox->setMessage2(fmt("Starting next installation in %d second(s)", time));
+					messageBox->setMessage2(fmt("%d秒后开始安装下个软件", time));
 				}
 			}
 			
@@ -157,7 +157,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 {
 	int index = folderList->GetFirstSelected();
 	
-	std::string title = fmt("Installing... (%d/%d)", pos, total);
+	std::string title = fmt("安装中... (%d/%d)", pos, total);
 	std::string gameName = folderList->GetName(index);
 	
 	messageBox->reload(title, gameName, "", MessageBox::BT_NOBUTTON, MessageBox::IT_ICONINFORMATION, true, "0.0 %");
@@ -177,7 +177,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 	unsigned int mcpHandle = MCP_Open();
 	if(mcpHandle == 0)
 	{
-		messageBox->reload("Install failed", gameName, "Failed to open MCP.", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+		messageBox->reload("安装失败", gameName, "无法打开MCP。", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 		
 		result = -1;
 	}
@@ -192,7 +192,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 		{
 			if(!mcpInstallInfo || !mcpInstallPath || !mcpPathInfoVector)
 			{
-				messageBox->reload("Install failed", gameName, "Could not allocate memory.", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+				messageBox->reload("安装失败", gameName, "无法分配内存。", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 				result = -2;
 				break;
 			}
@@ -207,7 +207,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 			if(res != 0)
 			{
 				//__os_snprintf(errorText1, sizeof(errorText1), "Error: MCP_InstallGetInfo 0x%08X", MCP_GetLastRawError());
-				messageBox->reload(installFolder, gameName, "Confirm complete WUP files are in the folder.", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+				messageBox->reload(installFolder, gameName, "确认文件夹中有完整的WUP文件。", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 				result = -3;
 				break;
 			}
@@ -233,7 +233,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 				res = MCP_InstallSetTargetDevice(mcpHandle, (MCPInstallTarget)(target));
 				if(res != 0)
 				{
-					messageBox->reload("Install failed", gameName, fmt("MCP_InstallSetTargetDevice 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+					messageBox->reload("安装失败", gameName, fmt("MCP_InstallSetTargetDevice 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 					//if (installToUsb)
 					//	__os_snprintf(errorText2, sizeof(errorText2), "Possible USB HDD disconnected or failure");
 					result = -5;
@@ -242,7 +242,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 				res = MCP_InstallSetTargetUsb(mcpHandle, (MCPInstallTarget)(target));
 				if(res != 0)
 				{
-					messageBox->reload("Install failed", gameName, fmt("MCP_InstallSetTargetUsb 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+					messageBox->reload("安装失败", gameName, fmt("MCP_InstallSetTargetUsb 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 					//if (installToUsb)
 					//	__os_snprintf(errorText2, sizeof(errorText2), "Possible USB HDD disconnected or failure");
 					result = -6;
@@ -264,7 +264,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 				res = IOS_IoctlvAsync(mcpHandle, MCP_COMMAND_INSTALL_ASYNC, 1, 0, mcpPathInfoVector, (IOSAsyncCallbackFn)IosInstallCallback, mcpInstallInfo);
 				if(res != 0)
 				{
-					messageBox->reload("Install failed", gameName, fmt("MCP_InstallTitleAsync 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+					messageBox->reload("安装失败", gameName, fmt("MCP_InstallTitleAsync 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 					result = -7;
 					break;
 				}
@@ -295,22 +295,22 @@ void InstallWindow::InstallProcess(int pos, int total)
 				{
 					if ((installError == 0xFFFCFFE9) && (target == USB))
 					{
-						messageBox->reload("Install failed", gameName, fmt("0x%08X access failed (no USB storage attached?)", installError), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+						messageBox->reload("安装失败", gameName, fmt("0x%08X无法连接 (没有USB设备?)", installError), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 						result = -8;
 					}
 					else
 					{
 						//__os_snprintf(errorText1, sizeof(errorText1), "Error: install error code 0x%08X", installError);
 						if (installError == 0xFFFBF446 || installError == 0xFFFBF43F)
-							messageBox->reload("Install failed", gameName, "Possible missing or bad title.tik file", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+							messageBox->reload("安装失败", gameName, "没有或已损的title.tik文件?", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 						else if (installError == 0xFFFBF441)
-							messageBox->reload("Install failed", gameName, "Possible incorrect console for DLC title.tik file", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+							messageBox->reload("安装失败", gameName, "DLC的title.tik可能不正确。", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 						else if (installError == 0xFFFCFFE4)
-							messageBox->reload("Install failed", gameName, "Possible not enough memory on target device", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+							messageBox->reload("安装失败", gameName, "可能选中的设备没有足够内存。", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 						else if (installError == 0xFFFFF825)
-							messageBox->reload("Install failed", gameName, "Possible bad SD card.  Reformat (32k blocks) or replace", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+							messageBox->reload("安装失败", gameName, "SD卡可能已损坏。重新格式化(簇大小选32k)或更换SD卡。", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 						else if ((installError & 0xFFFF0000) == 0xFFFB0000)
-							messageBox->reload("Install failed", gameName, "Verify WUP files are correct & complete. DLC/E-shop require Sig Patch", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+							messageBox->reload("安装失败", gameName, "检查WUP是否正确完整。数字版游戏和DLC需要Sig-Patches。", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 						
 						result = -9;
 					}
@@ -318,7 +318,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 			}
 			else
 			{
-				messageBox->reload("Install failed", gameName, "Not a game, game update, DLC, demo or version title", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+				messageBox->reload("安装失败", gameName, "不是游戏,更新补丁,DLC,试玩版或完整的WUP。", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 				result = -4;
 			}
 		}
@@ -338,12 +338,12 @@ void InstallWindow::InstallProcess(int pos, int total)
 	{
 		if(pos == total)
 		{
-			messageBox->reload("Succesfully installed", gameName, "", MessageBox::BT_OK, MessageBox::IT_ICONTRUE);
+			messageBox->reload("安装完成", gameName, "", MessageBox::BT_OK, MessageBox::IT_ICONTRUE);
 			messageBox->messageOkClicked.connect(this, &InstallWindow::OnCloseWindow);
 		}
 		else
 		{
-			messageBox->reload("Succesfully installed", gameName, "Starting next installation in 6 second(s)", MessageBox::BT_CANCEL, MessageBox::IT_ICONTRUE);
+			messageBox->reload("安装完成", gameName, "6秒后进行下个软件安装", MessageBox::BT_CANCEL, MessageBox::IT_ICONTRUE);
 			messageBox->messageCancelClicked.connect(this, &InstallWindow::OnInstallProcessCancel);
 		}
 		
