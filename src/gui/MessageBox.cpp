@@ -288,12 +288,12 @@ void MessageBox::setButtons(int typeButtons)
 	
 	const std::string ButtonString[] =
 	{
-		"Ok",
-		"Cancel",
-		"Yes",
-		"No",
-		"Nand",
-		"USB"
+		"确认",
+		"取消",
+		"是",
+		"否",
+		"主机存储",
+		"USB设备"
 	};
 	
 	if(typeButtons != BT_NOBUTTON)
